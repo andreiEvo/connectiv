@@ -1,6 +1,6 @@
 import { createClient } from "@/lib/supabase/client";
 
-export const MAX_PROFILE_IMAGE_BYTES = 2 * 1024 * 1024; // 2MB
+export const MAX_PROFILE_IMAGE_BYTES = 10 * 1024 * 1024; // 10MB
 
 export type ImageUploadError = "too_large" | "not_image" | "not_authenticated" | "upload_failed";
 
@@ -38,7 +38,7 @@ export async function uploadProfileImage(
 export function imageUploadErrorMessage(error: ImageUploadError): string {
   switch (error) {
     case "too_large":
-      return "Imaginea e prea mare (maxim 2MB).";
+      return "Imaginea e prea mare (maxim 10MB).";
     case "not_image":
       return "Alege un fișier imagine (JPG, PNG, WEBP).";
     case "not_authenticated":

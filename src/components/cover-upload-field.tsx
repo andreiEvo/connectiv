@@ -75,7 +75,7 @@ export function CoverUploadField({ initialUrl }: { initialUrl: string | null }) 
         </span>
       </button>
       <div className="flex items-center justify-between">
-        <p className="text-xs text-text-muted">JPG, PNG sau WEBP, maxim 2MB.</p>
+        <p className="text-xs text-text-muted">JPG, PNG sau WEBP, maxim 10MB.</p>
         {uploading && <p className="text-xs text-text-muted">Se încarcă…</p>}
       </div>
       {error && <p className="text-xs text-red-400">{error}</p>}

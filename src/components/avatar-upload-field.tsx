@@ -84,7 +84,7 @@ export function AvatarUploadField({
         >
           {uploading ? "Se încarcă…" : "Schimbă poza"}
         </button>
-        <p className="text-xs text-text-muted mt-0.5">JPG, PNG sau WEBP, maxim 2MB.</p>
+        <p className="text-xs text-text-muted mt-0.5">JPG, PNG sau WEBP, maxim 10MB.</p>
         {error && <p className="text-xs text-red-400 mt-0.5">{error}</p>}
       </div>
       <input

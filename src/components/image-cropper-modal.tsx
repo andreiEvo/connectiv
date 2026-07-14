@@ -9,12 +9,12 @@ type Shape = "circle" | "banner";
 
 const VIEWPORT: Record<Shape, { width: number; height: number }> = {
   circle: { width: 280, height: 280 },
-  banner: { width: 320, height: 120 },
+  banner: { width: 320, height: 80 },
 };
 
 const OUTPUT: Record<Shape, { width: number; height: number }> = {
   circle: { width: 480, height: 480 },
-  banner: { width: 1200, height: 450 },
+  banner: { width: 1600, height: 400 },
 };
 
 export function ImageCropperModal({
