@@ -3,7 +3,7 @@
 import { useState, useTransition } from "react";
 import { togglePremiumFlag } from "@/app/actions/profile";
 import { Button } from "@/components/ui/button";
-import { FREE_MONTHLY_CONVERSATIONS, PREMIUM_MONTHLY_PRICE_EUR } from "@/lib/constants";
+import { FREE_MONTHLY_CONVERSATIONS, MASTER_PROFILE_MONTHLY_PRICE_USD } from "@/lib/constants";
 import { cn } from "@/lib/cn";
 
 export function PremiumCard({
@@ -13,7 +13,7 @@ export function PremiumCard({
   initialIsPremium: boolean;
   conversationsUsed: number;
 }) {
-  const [isPremium, setIsPremium] = useState(initialIsPremium);
+  const [isMaster, setIsMaster] = useState(initialIsPremium);
   const [, startTransition] = useTransition();
 
   const remaining = Math.max(FREE_MONTHLY_CONVERSATIONS - conversationsUsed, 0);
@@ -22,16 +22,16 @@ export function PremiumCard({
     <div className="rounded-2xl border border-border bg-surface p-5">
       <div className="flex items-center justify-between mb-1">
         <h2 className="font-display text-base font-semibold">
-          {isPremium ? "Cont Premium" : "Cont gratuit"}
+          {isMaster ? "Master Profile" : "Cont gratuit"}
         </h2>
-        {isPremium && (
+        {isMaster && (
           <span className="text-[10px] uppercase tracking-wide text-on-accent bg-accent rounded-full px-2 py-0.5">
             Activ
           </span>
         )}
       </div>
 
-      {!isPremium ? (
+      {!isMaster ? (
         <>
           <p className="text-sm text-text-muted mb-3">
             Ai folosit{" "}
@@ -52,19 +52,19 @@ export function PremiumCard({
             />
           </div>
           <p className="text-sm text-text-muted mb-4 leading-relaxed">
-            Premium îți dă conversații nelimitate și vizibilitate crescută a profilului în feed, la{" "}
-            {PREMIUM_MONTHLY_PRICE_EUR}€/lună.
+            Master Profile îți dă conversații nelimitate și vizibilitate crescută a profilului în
+            feed, la {MASTER_PROFILE_MONTHLY_PRICE_USD}$/lună.
           </p>
           <Button
             className="w-full"
             onClick={() => {
-              setIsPremium(true);
+              setIsMaster(true);
               startTransition(async () => {
                 await togglePremiumFlag(true);
               });
             }}
           >
-            Treci la Premium
+            Treci la Master Profile
           </Button>
           <p className="text-[11px] text-text-muted text-center mt-2">
             Plățile reale nu sunt încă active — acesta e un demo al fluxului.
@@ -79,13 +79,13 @@ export function PremiumCard({
             variant="secondary"
             className="w-full"
             onClick={() => {
-              setIsPremium(false);
+              setIsMaster(false);
               startTransition(async () => {
                 await togglePremiumFlag(false);
               });
             }}
           >
-            Anulează Premium
+            Anulează Master Profile
           </Button>
         </>
       )}

@@ -1,10 +1,13 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Avatar } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FollowButton } from "@/components/follow-button";
 import { cityLabel, categoryLabel } from "@/lib/constants";
+import { LANG_COOKIE, DEFAULT_LANG, type LangCode } from "@/lib/lang-cookie";
+import { t } from "@/lib/i18n/dictionary";
 import type { Post } from "@/lib/supabase/types";
 
 export default async function ProfilePage({
@@ -22,6 +25,9 @@ export default async function ProfilePage({
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login");
+
+  const cookieStore = await cookies();
+  const lang = (cookieStore.get(LANG_COOKIE)?.value as LangCode) ?? DEFAULT_LANG;
 
   const isOwnProfile = user.id === id;
   const tab = isOwnProfile && (tabParam === "saved" || tabParam === "following") ? tabParam : "posts";
@@ -85,8 +91,23 @@ export default async function ProfilePage({
       <div className="px-4 pt-6 pb-4 flex flex-col items-center text-center gap-3">
         <Avatar name={profile.full_name} src={profile.avatar_url} size={72} />
         <div>
-          <h1 className="font-display text-lg font-semibold">{profile.full_name}</h1>
-          <p className="text-sm text-text-muted mt-0.5">{cityLabel(profile.city)}</p>
+          <h1 className="font-display text-lg font-semibold flex items-center gap-1.5 justify-center">
+            {profile.full_name}
+            {profile.avatar_verified && (
+              <span
+                title="Poză verificată"
+                className="inline-flex h-4 w-4 items-center justify-center rounded-full bg-accent text-on-accent"
+              >
+                <svg viewBox="0 0 24 24" fill="none" className="h-2.5 w-2.5">
+                  <path d="M5 13l4 4 10-10" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </span>
+            )}
+          </h1>
+          <p className="text-sm text-text-muted mt-0.5">
+            {cityLabel(profile.city)}
+            {profile.account_type === "companie" && " · Companie"}
+          </p>
         </div>
         {profile.building_what && (
           <p className="text-sm text-text max-w-xs leading-relaxed">{profile.building_what}</p>
@@ -111,6 +132,11 @@ export default async function ProfilePage({
         ) : (
           <FollowButton targetUserId={id} initialFollowing={!!isFollowingRow} />
         )}
+        {!profile.avatar_verified && isOwnProfile && (
+          <p className="text-xs text-text-muted max-w-xs">
+            Poza va fi verificată automat în curând.
+          </p>
+        )}
       </div>
 
       <div className="flex items-center justify-center gap-1 px-4 pb-3 border-b border-border">
@@ -123,13 +149,13 @@ export default async function ProfilePage({
 
       {posts.length === 0 ? (
         <EmptyState
-          title={tab === "saved" ? "Nimic salvat încă" : "Nicio postare încă"}
+          title={tab === "saved" ? t(lang, "empty_saved_title") : t(lang, "empty_posts_title")}
           description={
             tab === "saved"
-              ? "Salvează postări din feed ca să le găsești rapid aici."
+              ? t(lang, "empty_saved_description")
               : isOwnProfile
-                ? "Publică prima ta postare din butonul + de jos."
-                : "Această persoană nu a publicat încă nimic."
+                ? t(lang, "empty_posts_own")
+                : t(lang, "empty_posts_other")
           }
         />
       ) : (
@@ -137,7 +163,7 @@ export default async function ProfilePage({
           {posts.map((post) => (
             <Link
               key={post.id}
-              href="/feed"
+              href={`/feed?post=${post.id}`}
               className="relative aspect-[9/16] bg-surface-2 overflow-hidden group"
             >
               {post.thumbnail_url || post.video_url ? (

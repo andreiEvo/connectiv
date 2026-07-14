@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function toggleFollow(targetUserId: string) {
   const supabase = await createClient();
@@ -10,6 +11,9 @@ export async function toggleFollow(targetUserId: string) {
   } = await supabase.auth.getUser();
   if (!user) return { error: "not_authenticated" as const };
   if (user.id === targetUserId) return { error: "self" as const };
+
+  const allowed = await checkRateLimit(`follow:${user.id}`, { limit: 60, windowSeconds: 60 });
+  if (!allowed) return { error: "rate_limited" as const };
 
   const { data: existing } = await supabase
     .from("follows")

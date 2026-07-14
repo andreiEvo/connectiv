@@ -2,20 +2,22 @@ import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { CITY_COOKIE } from "@/lib/city-cookie";
+import { LANG_COOKIE, DEFAULT_LANG, type LangCode } from "@/lib/lang-cookie";
+import { t } from "@/lib/i18n/dictionary";
 import { DEFAULT_CITY, type CitySlug } from "@/lib/constants";
+import { fetchFeedPage, fetchSinglePost, FEED_PAGE_SIZE, type FeedPost } from "@/lib/feed-query";
 import { FeedTabs } from "@/components/feed-tabs";
-import { VideoCard } from "@/components/video-card";
+import { FeedList } from "@/components/feed-list";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Logo } from "@/components/logo";
-import type { PostWithAuthor } from "@/lib/supabase/types";
 import Link from "next/link";
 
 export default async function FeedPage({
   searchParams,
 }: {
-  searchParams: Promise<{ tab?: string }>;
+  searchParams: Promise<{ tab?: string; post?: string }>;
 }) {
-  const { tab: tabParam } = await searchParams;
+  const { tab: tabParam, post: anchorPostId } = await searchParams;
   const tab = tabParam === "following" ? "following" : "for-you";
 
   const supabase = await createClient();
@@ -26,35 +28,24 @@ export default async function FeedPage({
 
   const cookieStore = await cookies();
   const city = (cookieStore.get(CITY_COOKIE)?.value as CitySlug) ?? DEFAULT_CITY;
+  const lang = (cookieStore.get(LANG_COOKIE)?.value as LangCode) ?? DEFAULT_LANG;
 
-  const [{ data: followRows }, { data: saveRows }, { data: spotRows }] = await Promise.all([
+  const [{ data: followRows }, { data: saveRows }, { data: spotRows }, page] = await Promise.all([
     supabase.from("follows").select("following_id").eq("follower_id", user.id),
     supabase.from("saves").select("post_id").eq("user_id", user.id),
     supabase.from("meeting_spots").select("city, name, area"),
+    fetchFeedPage(supabase, { userId: user.id, tab, city, offset: 0 }),
   ]);
 
-  const followingIds = (followRows ?? []).map((r) => r.following_id);
+  const followingSet = new Set((followRows ?? []).map((r) => r.following_id));
   const savedIds = new Set((saveRows ?? []).map((r) => r.post_id));
-  const followingSet = new Set(followingIds);
 
-  let posts: PostWithAuthor[] = [];
+  let posts: FeedPost[] = page.posts;
+  let hasMore = page.hasMore;
 
-  if (tab === "following") {
-    if (followingIds.length > 0) {
-      const { data } = await supabase
-        .from("posts")
-        .select("*, author:profiles!posts_author_id_fkey(*)")
-        .in("author_id", followingIds)
-        .order("created_at", { ascending: false });
-      posts = (data as PostWithAuthor[]) ?? [];
-    }
-  } else {
-    const { data } = await supabase
-      .from("posts")
-      .select("*, author:profiles!posts_author_id_fkey(*)")
-      .eq("city", city)
-      .order("created_at", { ascending: false });
-    posts = (data as PostWithAuthor[]) ?? [];
+  if (anchorPostId && !posts.some((p) => p.id === anchorPostId)) {
+    const anchor = await fetchSinglePost(supabase, anchorPostId, user.id);
+    if (anchor) posts = [anchor, ...posts];
   }
 
   const spotsByCity = new Map<string, { name: string; area: string }[]>();
@@ -66,7 +57,7 @@ export default async function FeedPage({
 
   return (
     <div className="relative flex-1 min-h-0">
-      <FeedTabs active={tab} />
+      <FeedTabs active={tab} lang={lang} />
 
       {posts.length === 0 ? (
         <div className="h-full flex items-center justify-center">
@@ -74,37 +65,37 @@ export default async function FeedPage({
             icon={<Logo size={32} />}
             title={
               tab === "following"
-                ? "Nu urmărești pe nimeni încă"
-                : "Feed-ul e gol deocamdată"
+                ? t(lang, "empty_following_title")
+                : t(lang, "empty_feed_title")
             }
             description={
               tab === "following"
-                ? "Urmărește progresul cuiva din Pentru tine ca să apară aici."
-                : "Fii primul care construiește ceva vizibil aici."
+                ? t(lang, "empty_following_description")
+                : t(lang, "empty_feed_description")
             }
             action={
               <Link
                 href="/compose"
                 className="inline-flex h-10 items-center rounded-lg bg-accent px-4 text-sm font-medium text-on-accent hover:bg-accent/90 transition-colors"
               >
-                Creează prima postare
+                {t(lang, "create_first_post")}
               </Link>
             }
           />
         </div>
       ) : (
-        <div className="h-full overflow-y-scroll no-scrollbar snap-y-mandatory">
-          {posts.map((post) => (
-            <VideoCard
-              key={post.id}
-              post={post}
-              currentUserId={user.id}
-              initialFollowing={followingSet.has(post.author_id)}
-              initialSaved={savedIds.has(post.id)}
-              meetingSpots={spotsByCity.get(post.city) ?? []}
-            />
-          ))}
-        </div>
+        <FeedList
+          initialPosts={posts}
+          initialHasMore={hasMore}
+          tab={tab}
+          city={city}
+          currentUserId={user.id}
+          followingIds={[...followingSet]}
+          savedPostIds={[...savedIds]}
+          meetingSpotsByCity={Object.fromEntries(spotsByCity)}
+          anchorPostId={anchorPostId ?? null}
+          pageSize={FEED_PAGE_SIZE}
+        />
       )}
     </div>
   );

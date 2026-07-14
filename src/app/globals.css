@@ -116,3 +116,37 @@ body::before {
   background-size: 200% 100%;
   animation: shimmer 1.6s ease-in-out infinite;
 }
+
+@keyframes bolt-pulse {
+  0%,
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  8% {
+    opacity: 0.35;
+    transform: scale(0.9);
+  }
+  16% {
+    opacity: 1;
+    transform: scale(1.08);
+  }
+  24%,
+  60% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  68% {
+    opacity: 0.5;
+    transform: scale(0.95);
+  }
+  76% {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-bolt-pulse {
+  animation: bolt-pulse 1.6s ease-in-out infinite;
+  transform-origin: center;
+}

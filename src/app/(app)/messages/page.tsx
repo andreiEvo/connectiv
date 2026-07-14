@@ -1,9 +1,12 @@
 import Link from "next/link";
+import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import { Avatar } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/ui/empty-state";
-import { actionTypeLabel } from "@/lib/constants";
+import { actionTypeLabel, type ActionTypeSlug } from "@/lib/constants";
+import { LANG_COOKIE, DEFAULT_LANG, type LangCode } from "@/lib/lang-cookie";
+import { t } from "@/lib/i18n/dictionary";
 import type { Profile } from "@/lib/supabase/types";
 
 export default async function MessagesPage() {
@@ -13,6 +16,9 @@ export default async function MessagesPage() {
   } = await supabase.auth.getUser();
   if (!user) redirect("/auth/login");
 
+  const cookieStore = await cookies();
+  const lang = (cookieStore.get(LANG_COOKIE)?.value as LangCode) ?? DEFAULT_LANG;
+
   const { data: conversations } = await supabase
     .from("conversations")
     .select("*, initiator:profiles!conversations_initiator_id_fkey(*), recipient:profiles!conversations_recipient_id_fkey(*)")
@@ -21,7 +27,7 @@ export default async function MessagesPage() {
 
   const rows = (conversations ?? []) as Array<{
     id: string;
-    action_type: "sfat" | "cafea" | "colaborare";
+    action_type: ActionTypeSlug;
     created_at: string;
     initiator_id: string;
     recipient_id: string;
@@ -53,8 +59,8 @@ export default async function MessagesPage() {
 
       {rows.length === 0 ? (
         <EmptyState
-          title="Nicio conversație încă"
-          description="Pornește una din feed — cere un sfat, propune o cafea sau o colaborare."
+          title={t(lang, "empty_messages_title")}
+          description={t(lang, "empty_messages_description")}
         />
       ) : (
         <ul className="divide-y divide-border">

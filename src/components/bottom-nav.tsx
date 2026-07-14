@@ -3,20 +3,23 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
+import { t } from "@/lib/i18n/dictionary";
+import type { LangCode } from "@/lib/lang-cookie";
 
-const items = [
-  { href: "/feed", label: "Feed", icon: FeedIcon },
-  { href: "/messages", label: "Mesaje", icon: MessageIcon },
-  { href: "/compose", label: "Postează", icon: PlusIcon, isCompose: true },
-  { href: "/settings", label: "Setări", icon: SettingsIcon },
-];
-
-export function BottomNav({ profileId }: { profileId: string }) {
+export function BottomNav({ profileId, lang }: { profileId: string; lang: LangCode }) {
   const pathname = usePathname();
+
+  const items = [
+    { href: "/home", label: t(lang, "nav_home"), icon: HomeIcon },
+    { href: "/feed", label: t(lang, "nav_feed"), icon: FeedIcon },
+    { href: "/messages", label: t(lang, "nav_messages"), icon: MessageIcon },
+    { href: "/compose", label: t(lang, "nav_compose"), icon: PlusIcon, isCompose: true },
+    { href: "/settings", label: t(lang, "nav_settings"), icon: SettingsIcon },
+  ];
 
   return (
     <nav className="sticky bottom-0 z-30 border-t border-border bg-bg/95 backdrop-blur supports-[backdrop-filter]:bg-bg/80">
-      <div className="flex items-stretch justify-around h-16 max-w-lg mx-auto">
+      <div className="flex items-stretch justify-around h-20 max-w-lg mx-auto">
         {items.map((item) => {
           const href = item.href === "/profile" ? `/profile/${profileId}` : item.href;
           const active = pathname.startsWith(item.href);
@@ -30,8 +33,8 @@ export function BottomNav({ profileId }: { profileId: string }) {
                 aria-label={item.label}
                 className="flex items-center justify-center flex-1"
               >
-                <span className="flex items-center justify-center h-11 w-11 rounded-full bg-accent text-on-accent transition-transform duration-150 active:scale-90 hover:scale-105">
-                  <Icon className="h-5 w-5" />
+                <span className="flex items-center justify-center h-[52px] w-[52px] rounded-full bg-accent text-on-accent transition-transform duration-150 active:scale-90 hover:scale-105">
+                  <Icon className="h-6 w-6" />
                 </span>
               </Link>
             );
@@ -47,27 +50,39 @@ export function BottomNav({ profileId }: { profileId: string }) {
                 active ? "text-accent" : "text-text-muted hover:text-text",
               )}
             >
-              <Icon className="h-5 w-5" />
+              <Icon className="h-6 w-6" />
               {item.label}
             </Link>
           );
         })}
         <Link
           href={`/profile/${profileId}`}
-          aria-label="Profil"
+          aria-label={t(lang, "nav_profile")}
           className={cn(
             "flex flex-1 flex-col items-center justify-center gap-1 text-[11px] transition-colors duration-150",
             pathname.startsWith("/profile") ? "text-accent" : "text-text-muted hover:text-text",
           )}
         >
-          <ProfileIcon className="h-5 w-5" />
-          Profil
+          <ProfileIcon className="h-6 w-6" />
+          {t(lang, "nav_profile")}
         </Link>
       </div>
     </nav>
   );
 }
 
+function HomeIcon({ className }: { className?: string }) {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" className={className}>
+      <path
+        d="M4 11l8-6 8 6v8a1 1 0 01-1 1h-4v-6h-6v6H5a1 1 0 01-1-1v-8z"
+        stroke="currentColor"
+        strokeWidth="1.6"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
 function FeedIcon({ className }: { className?: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" className={className}>

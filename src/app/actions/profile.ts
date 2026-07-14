@@ -1,9 +1,16 @@
 "use server";
 
+import { z } from "zod";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import type { CitySlug } from "@/lib/constants";
+import { CITIES, type CitySlug } from "@/lib/constants";
+
+const updateProfileSchema = z.object({
+  fullName: z.string().trim().min(1).max(80),
+  buildingWhat: z.string().trim().max(140),
+  city: z.enum(CITIES.map((c) => c.slug) as [CitySlug, ...CitySlug[]]),
+});
 
 export async function updateProfile(formData: FormData) {
   const supabase = await createClient();
@@ -12,11 +19,13 @@ export async function updateProfile(formData: FormData) {
   } = await supabase.auth.getUser();
   if (!user) return { error: "Trebuie să fii autentificat." };
 
-  const fullName = (formData.get("fullName") as string)?.trim();
-  const buildingWhat = (formData.get("buildingWhat") as string)?.trim();
-  const city = formData.get("city") as CitySlug;
-
-  if (!fullName) return { error: "Numele nu poate fi gol." };
+  const parsed = updateProfileSchema.safeParse({
+    fullName: formData.get("fullName"),
+    buildingWhat: formData.get("buildingWhat"),
+    city: formData.get("city"),
+  });
+  if (!parsed.success) return { error: "Numele nu poate fi gol." };
+  const { fullName, buildingWhat, city } = parsed.data;
 
   const { error } = await supabase
     .from("profiles")

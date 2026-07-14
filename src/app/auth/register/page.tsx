@@ -3,14 +3,25 @@
 import { useState, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { register } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
-import { CITIES, DEFAULT_CITY, type CitySlug } from "@/lib/constants";
+import { cn } from "@/lib/cn";
+import { t } from "@/lib/i18n/dictionary";
+import { useLang } from "@/lib/i18n/use-lang";
+import {
+  ACCOUNT_TYPES,
+  CITIES,
+  DEFAULT_CITY,
+  type AccountTypeSlug,
+  type CitySlug,
+} from "@/lib/constants";
 
 export default function RegisterPage() {
   const router = useRouter();
+  const lang = useLang();
+  const [accountType, setAccountType] = useState<AccountTypeSlug>("individual");
   const [fullName, setFullName] = useState("");
   const [buildingWhat, setBuildingWhat] = useState("");
   const [city, setCity] = useState<CitySlug>(DEFAULT_CITY);
@@ -18,6 +29,8 @@ export default function RegisterPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
+
+  const isCompany = accountType === "companie";
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
@@ -29,59 +42,68 @@ export default function RegisterPage() {
     }
 
     setLoading(true);
-    const supabase = createClient();
-    const { data, error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        data: {
-          full_name: fullName,
-          building_what: buildingWhat,
-          city,
-        },
-      },
-    });
+    const formData = new FormData();
+    formData.set("fullName", fullName);
+    formData.set("buildingWhat", buildingWhat);
+    formData.set("city", city);
+    formData.set("accountType", accountType);
+    formData.set("email", email);
+    formData.set("password", password);
+    const result = await register(formData);
     setLoading(false);
 
-    if (error) {
-      setError(
-        error.message.includes("already registered")
-          ? "Există deja un cont cu acest email."
-          : "Nu am putut crea contul. Încearcă din nou.",
-      );
+    if (!result.ok) {
+      setError(result.error);
       return;
     }
 
-    if (data.session) {
+    if (result.hasSession) {
       router.push("/feed");
       router.refresh();
     } else {
-      setError(null);
       router.push("/auth/login?confirmEmail=1");
     }
   }
 
   return (
     <div>
-      <h1 className="font-display text-xl font-semibold mb-1">Hai să construim</h1>
-      <p className="text-sm text-text-muted mb-6">
-        Câteva detalii, apoi ești în feed.
-      </p>
+      <h1 className="font-display text-xl font-semibold mb-1">{t(lang, "auth_register_title")}</h1>
+      <p className="text-sm text-text-muted mb-6">{t(lang, "auth_register_subtitle")}</p>
+
+      <div className="flex rounded-lg border border-border-strong p-1 mb-5">
+        {ACCOUNT_TYPES.map((accType) => (
+          <button
+            key={accType.slug}
+            type="button"
+            onClick={() => setAccountType(accType.slug)}
+            className={cn(
+              "flex-1 h-9 rounded-md text-sm font-medium transition-colors duration-150",
+              accountType === accType.slug
+                ? "bg-accent text-on-accent"
+                : "text-text-muted hover:text-text",
+            )}
+          >
+            {accType.label}
+          </button>
+        ))}
+      </div>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="space-y-1.5">
-          <Label htmlFor="fullName">Nume</Label>
+          <Label htmlFor="fullName">{isCompany ? "Numele companiei" : "Nume"}</Label>
           <Input
             id="fullName"
             required
             value={fullName}
             onChange={(e) => setFullName(e.target.value)}
-            placeholder="Numele tău"
+            placeholder={isCompany ? "Numele companiei tale" : "Numele tău"}
           />
         </div>
 
         <div className="space-y-1.5">
-          <Label htmlFor="buildingWhat">Ce construiești?</Label>
+          <Label htmlFor="buildingWhat">
+            {isCompany ? "Despre companie" : "Ce construiești?"}
+          </Label>
           <Textarea
             id="buildingWhat"
             required
@@ -89,7 +111,11 @@ export default function RegisterPage() {
             maxLength={140}
             value={buildingWhat}
             onChange={(e) => setBuildingWhat(e.target.value)}
-            placeholder="O propoziție scurtă — ex: un brand de cafea de specialitate"
+            placeholder={
+              isCompany
+                ? "O propoziție scurtă — ex: organizăm evenimente pentru comunitatea tech din oraș"
+                : "O propoziție scurtă — ex: un brand de cafea de specialitate"
+            }
           />
         </div>
 
@@ -133,14 +159,14 @@ export default function RegisterPage() {
         {error && <p className="text-sm text-red-400">{error}</p>}
 
         <Button type="submit" className="w-full" size="lg" disabled={loading}>
-          {loading ? "Se creează contul…" : "Creează cont"}
+          {loading ? "Se creează contul…" : t(lang, "auth_register_button")}
         </Button>
       </form>
 
       <p className="text-sm text-text-muted text-center mt-6">
-        Ai deja cont?{" "}
+        {t(lang, "auth_have_account")}{" "}
         <Link href="/auth/login" className="text-accent hover:underline">
-          Intră
+          {t(lang, "auth_login_link")}
         </Link>
       </p>
     </div>

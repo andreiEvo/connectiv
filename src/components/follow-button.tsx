@@ -7,9 +7,13 @@ import { Button } from "@/components/ui/button";
 export function FollowButton({
   targetUserId,
   initialFollowing,
+  label = "Adaugă ca coleg de comunitate",
+  activeLabel = "Coleg de comunitate",
 }: {
   targetUserId: string;
   initialFollowing: boolean;
+  label?: string;
+  activeLabel?: string;
 }) {
   const [following, setFollowing] = useState(initialFollowing);
   const [, startTransition] = useTransition();
@@ -26,7 +30,7 @@ export function FollowButton({
         });
       }}
     >
-      {following ? "Urmărești progresul" : "Urmărește progresul"}
+      {following ? activeLabel : label}
     </Button>
   );
 }

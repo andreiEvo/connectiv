@@ -3,6 +3,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
 import { currentMonthKey } from "@/lib/month";
+import { checkRateLimit } from "@/lib/rate-limit";
 import { FREE_MONTHLY_CONVERSATIONS, type ActionTypeSlug } from "@/lib/constants";
 
 export type StartConversationInput = {
@@ -99,13 +100,16 @@ export async function startConversation(
 
 export async function sendMessage(conversationId: string, body: string) {
   const trimmed = body.trim();
-  if (!trimmed) return { ok: false as const };
+  if (!trimmed || trimmed.length > 2000) return { ok: false as const };
 
   const supabase = await createClient();
   const {
     data: { user },
   } = await supabase.auth.getUser();
   if (!user) return { ok: false as const };
+
+  const allowed = await checkRateLimit(`message:${user.id}`, { limit: 30, windowSeconds: 60 });
+  if (!allowed) return { ok: false as const };
 
   const { error } = await supabase
     .from("messages")

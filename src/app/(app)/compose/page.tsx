@@ -4,7 +4,7 @@ import { useRef, useState, FormEvent } from "react";
 import { createClient } from "@/lib/supabase/client";
 import { createPost } from "@/app/actions/posts";
 import { Button } from "@/components/ui/button";
-import { Label, Textarea } from "@/components/ui/input";
+import { Input, Label, Textarea } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { CATEGORIES, CITIES, DEFAULT_CITY, type CategorySlug, type CitySlug } from "@/lib/constants";
 
@@ -22,6 +22,7 @@ export default function ComposePage() {
   const [category, setCategory] = useState<CategorySlug>(CATEGORIES[0].slug);
   const [city, setCity] = useState<CitySlug>(DEFAULT_CITY);
   const [description, setDescription] = useState("");
+  const [eventAt, setEventAt] = useState("");
   const [stage, setStage] = useState<Stage>("idle");
   const [error, setError] = useState<string | null>(null);
 
@@ -69,6 +70,10 @@ export default function ComposePage() {
       setError("Adaugă o descriere scurtă.");
       return;
     }
+    if (category === "eveniment" && !eventAt) {
+      setError("Adaugă data și ora evenimentului.");
+      return;
+    }
 
     let videoPath: string | null = null;
 
@@ -103,6 +108,7 @@ export default function ComposePage() {
     formData.set("city", city);
     formData.set("description", description.trim());
     if (videoPath) formData.set("videoPath", videoPath);
+    if (category === "eveniment" && eventAt) formData.set("eventAt", eventAt);
 
     const result = await createPost(formData);
     if (result?.error) {
@@ -116,9 +122,10 @@ export default function ComposePage() {
 
   return (
     <div className="flex-1 overflow-y-auto px-4 py-5">
-      <h1 className="font-display text-xl font-semibold mb-1">Ce construiești acum?</h1>
+      <h1 className="font-display text-xl font-semibold mb-1">Ce se întâmplă azi?</h1>
       <p className="text-sm text-text-muted mb-6">
-        Un video scurt (30-90s) sau doar câteva cuvinte — cât să înceapă conversația.
+        O impresie zilnică, un proiect la care lucrezi sau un eveniment — un video scurt (30-90s)
+        sau doar câteva cuvinte.
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -209,6 +216,19 @@ export default function ComposePage() {
             </Select>
           </div>
         </div>
+
+        {category === "eveniment" && (
+          <div className="space-y-1.5">
+            <Label htmlFor="eventAt">Data și ora evenimentului</Label>
+            <Input
+              id="eventAt"
+              type="datetime-local"
+              required
+              value={eventAt}
+              onChange={(e) => setEventAt(e.target.value)}
+            />
+          </div>
+        )}
 
         {error && <p className="text-sm text-red-400">{error}</p>}
 

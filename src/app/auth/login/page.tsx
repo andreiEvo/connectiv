@@ -3,9 +3,11 @@
 import { Suspense, useState, FormEvent } from "react";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { createClient } from "@/lib/supabase/client";
+import { login } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
+import { t } from "@/lib/i18n/dictionary";
+import { useLang } from "@/lib/i18n/use-lang";
 
 export default function LoginPage() {
   return (
@@ -17,6 +19,7 @@ export default function LoginPage() {
 
 function LoginForm() {
   const router = useRouter();
+  const lang = useLang();
   const searchParams = useSearchParams();
   const confirmEmail = searchParams.get("confirmEmail") === "1";
   const [email, setEmail] = useState("");
@@ -28,11 +31,13 @@ function LoginForm() {
     e.preventDefault();
     setError(null);
     setLoading(true);
-    const supabase = createClient();
-    const { error } = await supabase.auth.signInWithPassword({ email, password });
+    const formData = new FormData();
+    formData.set("email", email);
+    formData.set("password", password);
+    const result = await login(formData);
     setLoading(false);
-    if (error) {
-      setError("Email sau parolă greșită. Încearcă din nou.");
+    if (!result.ok) {
+      setError(result.error);
       return;
     }
     router.push("/feed");
@@ -41,8 +46,8 @@ function LoginForm() {
 
   return (
     <div>
-      <h1 className="font-display text-xl font-semibold mb-1">Bine ai revenit</h1>
-      <p className="text-sm text-text-muted mb-6">Intră în cont și continuă să construiești.</p>
+      <h1 className="font-display text-xl font-semibold mb-1">{t(lang, "auth_login_title")}</h1>
+      <p className="text-sm text-text-muted mb-6">{t(lang, "auth_login_subtitle")}</p>
 
       {confirmEmail && (
         <p className="text-sm text-accent bg-accent/10 border border-accent/30 rounded-lg px-3 py-2 mb-4">
@@ -80,14 +85,14 @@ function LoginForm() {
         {error && <p className="text-sm text-red-400">{error}</p>}
 
         <Button type="submit" className="w-full" size="lg" disabled={loading}>
-          {loading ? "Se conectează…" : "Intră în cont"}
+          {loading ? t(lang, "auth_login_loading") : t(lang, "auth_login_button")}
         </Button>
       </form>
 
       <p className="text-sm text-text-muted text-center mt-6">
-        Nu ai cont încă?{" "}
+        {t(lang, "auth_no_account")}{" "}
         <Link href="/auth/register" className="text-accent hover:underline">
-          Creează unul
+          {t(lang, "auth_create_one")}
         </Link>
       </p>
     </div>

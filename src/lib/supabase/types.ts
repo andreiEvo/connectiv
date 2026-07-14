@@ -1,4 +1,10 @@
-import type { CategorySlug, CitySlug, ActionTypeSlug } from "@/lib/constants";
+import type {
+  CategorySlug,
+  CitySlug,
+  ActionTypeSlug,
+  ReactionKind,
+  AccountTypeSlug,
+} from "@/lib/constants";
 
 export type Profile = {
   id: string;
@@ -8,6 +14,8 @@ export type Profile = {
   avatar_url: string | null;
   is_approved: boolean;
   is_premium: boolean;
+  account_type: AccountTypeSlug;
+  avatar_verified: boolean;
   created_at: string;
 };
 
@@ -19,6 +27,7 @@ export type Post = {
   video_url: string | null;
   thumbnail_url: string | null;
   city: CitySlug;
+  event_at: string | null;
   created_at: string;
 };
 
@@ -72,6 +81,28 @@ export type MeetingSpot = {
   area: string;
 };
 
+export type Reaction = {
+  post_id: string;
+  user_id: string;
+  kind: ReactionKind;
+  created_at: string;
+};
+
+export type Comment = {
+  id: string;
+  post_id: string;
+  author_id: string;
+  body: string;
+  created_at: string;
+};
+
+export type CommentWithAuthor = Comment & { author: Profile };
+
+export type RateLimitEvent = {
+  key: string;
+  created_at: string;
+};
+
 type Relationships = { Relationships: [] };
 
 export type Database = {
@@ -120,6 +151,21 @@ export type Database = {
         Row: MeetingSpot;
         Insert: MeetingSpot;
         Update: Partial<MeetingSpot>;
+      } & Relationships;
+      reactions: {
+        Row: Reaction;
+        Insert: Partial<Reaction> & { post_id: string; user_id: string; kind: ReactionKind };
+        Update: Partial<Reaction>;
+      } & Relationships;
+      comments: {
+        Row: Comment;
+        Insert: Partial<Comment> & { post_id: string; author_id: string; body: string };
+        Update: Partial<Comment>;
+      } & Relationships;
+      rate_limit_events: {
+        Row: RateLimitEvent;
+        Insert: Partial<RateLimitEvent> & { key: string };
+        Update: Partial<RateLimitEvent>;
       } & Relationships;
     };
     Views: Record<string, never>;

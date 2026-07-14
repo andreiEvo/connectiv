@@ -1,11 +1,21 @@
 "use server";
 
+import { z } from "zod";
 import { redirect } from "next/navigation";
 import { revalidatePath } from "next/cache";
 import { createClient } from "@/lib/supabase/server";
-import type { CategorySlug, CitySlug } from "@/lib/constants";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { CATEGORIES, CITIES, type CategorySlug, type CitySlug } from "@/lib/constants";
 
 export type CreatePostResult = { error: string } | undefined;
+
+const postSchema = z.object({
+  category: z.enum(CATEGORIES.map((c) => c.slug) as [CategorySlug, ...CategorySlug[]]),
+  city: z.enum(CITIES.map((c) => c.slug) as [CitySlug, ...CitySlug[]]),
+  description: z.string().trim().min(1).max(280),
+  videoPath: z.string().max(300).nullable(),
+  eventAt: z.string().max(60).nullable(),
+});
 
 export async function createPost(formData: FormData): Promise<CreatePostResult> {
   const supabase = await createClient();
@@ -14,16 +24,28 @@ export async function createPost(formData: FormData): Promise<CreatePostResult> 
   } = await supabase.auth.getUser();
   if (!user) return { error: "Trebuie să fii autentificat." };
 
-  const category = formData.get("category") as CategorySlug | null;
-  const city = formData.get("city") as CitySlug | null;
-  const description = (formData.get("description") as string | null)?.trim() ?? "";
-  const videoPath = formData.get("videoPath") as string | null;
-
-  if (!category || !city) {
-    return { error: "Completează categoria și orașul." };
+  const parsed = postSchema.safeParse({
+    category: formData.get("category"),
+    city: formData.get("city"),
+    description: formData.get("description"),
+    videoPath: formData.get("videoPath") as string | null,
+    eventAt: formData.get("eventAt") as string | null,
+  });
+  if (!parsed.success) {
+    return { error: "Completează categoria, orașul și o descriere scurtă." };
   }
-  if (!description) {
-    return { error: "Adaugă o descriere scurtă." };
+  const { category, city, description, videoPath, eventAt } = parsed.data;
+
+  if (category === "eveniment" && !eventAt) {
+    return { error: "Adaugă data și ora evenimentului." };
+  }
+  if (videoPath && !videoPath.startsWith(`${user.id}/`)) {
+    return { error: "Fișier video invalid." };
+  }
+
+  const allowed = await checkRateLimit(`post:${user.id}`, { limit: 10, windowSeconds: 60 * 60 });
+  if (!allowed) {
+    return { error: "Ai publicat prea multe postări recent. Încearcă mai târziu." };
   }
 
   let videoUrl: string | null = null;
@@ -40,6 +62,7 @@ export async function createPost(formData: FormData): Promise<CreatePostResult> 
       city,
       description,
       video_url: videoUrl,
+      event_at: category === "eveniment" && eventAt ? new Date(eventAt).toISOString() : null,
     })
     .select("id")
     .single();
