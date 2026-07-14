@@ -1,7 +1,11 @@
 import { createServerClient } from "@supabase/ssr";
 import { NextResponse, type NextRequest } from "next/server";
 
-const PUBLIC_PATHS = ["/auth/login", "/auth/register", "/api/health"];
+// Publicly reachable without a session.
+const PUBLIC_PATHS = ["/auth/login", "/auth/register", "/api/health", "/terms", "/privacy"];
+// Only these redirect an already-authenticated visitor away (to /feed) — the
+// legal/health pages stay visible to logged-in users too.
+const AUTH_ONLY_PATHS = ["/auth/login", "/auth/register"];
 
 export async function updateSession(request: NextRequest) {
   let response = NextResponse.next({ request });
@@ -31,6 +35,7 @@ export async function updateSession(request: NextRequest) {
 
   const { pathname } = request.nextUrl;
   const isPublicPath = PUBLIC_PATHS.some((p) => pathname.startsWith(p));
+  const isAuthOnlyPath = AUTH_ONLY_PATHS.some((p) => pathname.startsWith(p));
   const isStaticAsset =
     pathname.startsWith("/_next") ||
     pathname.startsWith("/icons") ||
@@ -44,7 +49,7 @@ export async function updateSession(request: NextRequest) {
     return NextResponse.redirect(url);
   }
 
-  if (user && isPublicPath) {
+  if (user && isAuthOnlyPath) {
     const url = request.nextUrl.clone();
     url.pathname = "/feed";
     return NextResponse.redirect(url);

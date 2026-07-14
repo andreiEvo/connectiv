@@ -57,3 +57,19 @@ export async function signOut() {
   await supabase.auth.signOut();
   redirect("/auth/login");
 }
+
+export async function deleteAccount() {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Trebuie să fii autentificat." };
+
+  const { createAdminClient } = await import("@/lib/supabase/admin");
+  const admin = createAdminClient();
+  const { error } = await admin.auth.admin.deleteUser(user.id);
+  if (error) return { error: "Nu am putut șterge contul. Încearcă din nou." };
+
+  await supabase.auth.signOut();
+  redirect("/auth/login");
+}

@@ -3,6 +3,7 @@
 import { z } from "zod";
 import { createClient } from "@/lib/supabase/server";
 import { checkRateLimit, clientIp } from "@/lib/rate-limit";
+import { passwordSchema } from "@/lib/password";
 import { CITIES, ACCOUNT_TYPES, type CitySlug, type AccountTypeSlug } from "@/lib/constants";
 
 const loginSchema = z.object({
@@ -41,7 +42,8 @@ const registerSchema = z.object({
   city: z.enum(CITIES.map((c) => c.slug) as [CitySlug, ...CitySlug[]]),
   accountType: z.enum(ACCOUNT_TYPES.map((a) => a.slug) as [AccountTypeSlug, ...AccountTypeSlug[]]),
   email: z.string().trim().toLowerCase().email(),
-  password: z.string().min(6).max(72),
+  password: passwordSchema,
+  acceptedTerms: z.literal("true"),
 });
 
 export type RegisterResult =
@@ -56,9 +58,17 @@ export async function register(formData: FormData): Promise<RegisterResult> {
     accountType: formData.get("accountType"),
     email: formData.get("email"),
     password: formData.get("password"),
+    acceptedTerms: formData.get("acceptedTerms"),
   });
   if (!parsed.success) {
-    return { ok: false, error: "Completează toate câmpurile corect." };
+    const firstIssue = parsed.error.issues[0]?.message;
+    return {
+      ok: false,
+      error:
+        parsed.error.issues[0]?.path[0] === "acceptedTerms"
+          ? "Trebuie să accepți Termenii și Politica de confidențialitate."
+          : (firstIssue ?? "Completează toate câmpurile corect."),
+    };
   }
 
   const ip = await clientIp();

@@ -106,16 +106,21 @@ export function StoryViewer({
         )}
 
         <div className="absolute top-0 inset-x-0 z-20 flex gap-1 p-2 pt-3">
-          {stories.map((s, i) => (
-            <div key={s.id} className="h-0.5 flex-1 rounded-full bg-white/30 overflow-hidden">
+          {stories.map((s, i) => {
+            const fillPct = i < storyIndex ? 100 : i === storyIndex ? progress * 100 : 0;
+            return (
               <div
-                className="h-full bg-white"
-                style={{
-                  width: i < storyIndex ? "100%" : i === storyIndex ? `${progress * 100}%` : "0%",
-                }}
-              />
-            </div>
-          ))}
+                key={s.id}
+                className="relative h-1.5 flex-1 rounded-full overflow-hidden"
+                style={{ background: "linear-gradient(90deg, #22c55e, #eab308 55%, #ef4444)" }}
+              >
+                <div
+                  className="absolute inset-y-0 right-0 bg-white/25 transition-[width] duration-100 ease-linear"
+                  style={{ width: `${100 - fillPct}%` }}
+                />
+              </div>
+            );
+          })}
         </div>
 
         {story && (

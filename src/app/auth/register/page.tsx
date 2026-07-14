@@ -10,6 +10,7 @@ import { Select } from "@/components/ui/select";
 import { cn } from "@/lib/cn";
 import { t } from "@/lib/i18n/dictionary";
 import { useLang } from "@/lib/i18n/use-lang";
+import { passwordIssues, PASSWORD_MIN_LENGTH } from "@/lib/password";
 import {
   ACCOUNT_TYPES,
   CITIES,
@@ -27,17 +28,23 @@ export default function RegisterPage() {
   const [city, setCity] = useState<CitySlug>(DEFAULT_CITY);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
   const isCompany = accountType === "companie";
+  const missingRequirements = passwordIssues(password);
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setError(null);
 
-    if (password.length < 6) {
-      setError("Parola trebuie să aibă cel puțin 6 caractere.");
+    if (missingRequirements.length > 0) {
+      setError(`Parola mai are nevoie de: ${missingRequirements.join(", ")}.`);
+      return;
+    }
+    if (!acceptedTerms) {
+      setError("Trebuie să accepți Termenii și Politica de confidențialitate.");
       return;
     }
 
@@ -49,6 +56,7 @@ export default function RegisterPage() {
     formData.set("accountType", accountType);
     formData.set("email", email);
     formData.set("password", password);
+    formData.set("acceptedTerms", String(acceptedTerms));
     const result = await register(formData);
     setLoading(false);
 
@@ -152,9 +160,33 @@ export default function RegisterPage() {
             autoComplete="new-password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder="minimum 6 caractere"
+            placeholder={`minim ${PASSWORD_MIN_LENGTH} caractere`}
           />
+          <p className="text-xs text-text-muted">
+            Minim {PASSWORD_MIN_LENGTH} caractere, o literă mare și un semn de punctuație /
+            caracter special (ex: Cluj2026!).
+          </p>
         </div>
+
+        <label className="flex items-start gap-2.5 text-xs text-text-muted">
+          <input
+            type="checkbox"
+            checked={acceptedTerms}
+            onChange={(e) => setAcceptedTerms(e.target.checked)}
+            className="mt-0.5 h-4 w-4 shrink-0 rounded border-border-strong accent-accent"
+          />
+          <span>
+            Sunt de acord cu{" "}
+            <Link href="/terms" target="_blank" className="text-accent hover:underline">
+              Termenii și Condițiile
+            </Link>{" "}
+            și{" "}
+            <Link href="/privacy" target="_blank" className="text-accent hover:underline">
+              Politica de Confidențialitate
+            </Link>
+            .
+          </span>
+        </label>
 
         {error && <p className="text-sm text-red-400">{error}</p>}
 
