@@ -17,7 +17,7 @@ export function HomeGrid({
 }: {
   initialPosts: FeedPost[];
   initialHasMore: boolean;
-  city: CitySlug;
+  city: CitySlug | null;
   pageSize: number;
 }) {
   const lang = useLang();

@@ -4,12 +4,21 @@ export const MAX_PROFILE_IMAGE_BYTES = 2 * 1024 * 1024; // 2MB
 
 export type ImageUploadError = "too_large" | "not_image" | "not_authenticated" | "upload_failed";
 
+function extensionFor(blob: Blob): string {
+  if (blob instanceof File) {
+    const fromName = blob.name.split(".").pop();
+    if (fromName) return fromName;
+  }
+  const fromType = blob.type.split("/").pop();
+  return fromType || "jpg";
+}
+
 export async function uploadProfileImage(
-  file: File,
+  blob: Blob,
   kind: "avatar" | "cover",
 ): Promise<{ ok: true; path: string } | { ok: false; error: ImageUploadError }> {
-  if (!file.type.startsWith("image/")) return { ok: false, error: "not_image" };
-  if (file.size > MAX_PROFILE_IMAGE_BYTES) return { ok: false, error: "too_large" };
+  if (!blob.type.startsWith("image/")) return { ok: false, error: "not_image" };
+  if (blob.size > MAX_PROFILE_IMAGE_BYTES) return { ok: false, error: "too_large" };
 
   const supabase = createClient();
   const {
@@ -17,11 +26,10 @@ export async function uploadProfileImage(
   } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: "not_authenticated" };
 
-  const ext = file.name.split(".").pop() || "jpg";
-  const path = `${user.id}/${kind}.${ext}`;
+  const path = `${user.id}/${kind}.${extensionFor(blob)}`;
   const { error } = await supabase.storage
     .from("avatars")
-    .upload(path, file, { contentType: file.type, upsert: true });
+    .upload(path, blob, { contentType: blob.type, upsert: true });
   if (error) return { ok: false, error: "upload_failed" };
 
   return { ok: true, path };

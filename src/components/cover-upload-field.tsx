@@ -3,24 +3,30 @@
 import { useRef, useState } from "react";
 import { uploadProfileImage, imageUploadErrorMessage } from "@/lib/image-upload";
 import { updateCoverUrl } from "@/app/actions/profile";
+import { ImageCropperModal } from "@/components/image-cropper-modal";
 import { cn } from "@/lib/cn";
 
 export function CoverUploadField({ initialUrl }: { initialUrl: string | null }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [url, setUrl] = useState(initialUrl);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     setError(null);
-    setUploading(true);
+    setPendingFile(file);
+  }
 
-    const previewUrl = URL.createObjectURL(file);
+  async function handleCropped(blob: Blob) {
+    setPendingFile(null);
+    setUploading(true);
+    const previewUrl = URL.createObjectURL(blob);
     setUrl(previewUrl);
 
-    const result = await uploadProfileImage(file, "cover");
+    const result = await uploadProfileImage(blob, "cover");
     if (!result.ok) {
       setError(imageUploadErrorMessage(result.error));
       setUploading(false);
@@ -79,7 +85,17 @@ export function CoverUploadField({ initialUrl }: { initialUrl: string | null }) 
         accept="image/*"
         onChange={handleChange}
         className="hidden"
+        value=""
       />
+
+      {pendingFile && (
+        <ImageCropperModal
+          file={pendingFile}
+          shape="banner"
+          onCancel={() => setPendingFile(null)}
+          onCropped={handleCropped}
+        />
+      )}
     </div>
   );
 }

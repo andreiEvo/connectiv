@@ -4,6 +4,7 @@ import { useRef, useState } from "react";
 import { uploadProfileImage, imageUploadErrorMessage } from "@/lib/image-upload";
 import { updateAvatarUrl } from "@/app/actions/profile";
 import { Avatar } from "@/components/ui/avatar";
+import { ImageCropperModal } from "@/components/image-cropper-modal";
 
 export function AvatarUploadField({
   fullName,
@@ -14,19 +15,24 @@ export function AvatarUploadField({
 }) {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [url, setUrl] = useState(initialUrl);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  async function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file) return;
     setError(null);
-    setUploading(true);
+    setPendingFile(file);
+  }
 
-    const previewUrl = URL.createObjectURL(file);
+  async function handleCropped(blob: Blob) {
+    setPendingFile(null);
+    setUploading(true);
+    const previewUrl = URL.createObjectURL(blob);
     setUrl(previewUrl);
 
-    const result = await uploadProfileImage(file, "avatar");
+    const result = await uploadProfileImage(blob, "avatar");
     if (!result.ok) {
       setError(imageUploadErrorMessage(result.error));
       setUploading(false);
@@ -87,7 +93,17 @@ export function AvatarUploadField({
         accept="image/*"
         onChange={handleChange}
         className="hidden"
+        value=""
       />
+
+      {pendingFile && (
+        <ImageCropperModal
+          file={pendingFile}
+          shape="circle"
+          onCancel={() => setPendingFile(null)}
+          onCropped={handleCropped}
+        />
+      )}
     </div>
   );
 }

@@ -6,7 +6,7 @@ import type { CitySlug } from "@/lib/constants";
 
 export async function loadMorePosts(input: {
   tab: "for-you" | "following";
-  city: CitySlug;
+  city: CitySlug | null;
   offset: number;
 }): Promise<{ posts: FeedPost[]; hasMore: boolean }> {
   const supabase = await createClient();

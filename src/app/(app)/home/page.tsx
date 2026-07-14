@@ -1,10 +1,8 @@
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
-import { CITY_COOKIE } from "@/lib/city-cookie";
 import { LANG_COOKIE, DEFAULT_LANG, type LangCode } from "@/lib/lang-cookie";
 import { t } from "@/lib/i18n/dictionary";
-import { DEFAULT_CITY, type CitySlug } from "@/lib/constants";
 import { fetchFeedPage, FEED_PAGE_SIZE } from "@/lib/feed-query";
 import { getActiveStoryAuthors, hasActiveStory } from "@/app/actions/stories";
 import { EmptyState } from "@/components/ui/empty-state";
@@ -22,11 +20,10 @@ export default async function HomePage() {
   if (!user) redirect("/auth/login");
 
   const cookieStore = await cookies();
-  const city = (cookieStore.get(CITY_COOKIE)?.value as CitySlug) ?? DEFAULT_CITY;
   const lang = (cookieStore.get(LANG_COOKIE)?.value as LangCode) ?? DEFAULT_LANG;
 
   const [{ posts, hasMore }, { data: profile }, storyAuthors, ownsStory] = await Promise.all([
-    fetchFeedPage(supabase, { userId: user.id, tab: "for-you", city, offset: 0, limit: 12 }),
+    fetchFeedPage(supabase, { userId: user.id, tab: "for-you", city: null, offset: 0, limit: 12 }),
     supabase.from("profiles").select("*").eq("id", user.id).single(),
     getActiveStoryAuthors(),
     hasActiveStory(user.id),
@@ -59,7 +56,7 @@ export default async function HomePage() {
           }
         />
       ) : (
-        <HomeGrid initialPosts={posts} initialHasMore={hasMore} city={city} pageSize={FEED_PAGE_SIZE} />
+        <HomeGrid initialPosts={posts} initialHasMore={hasMore} city={null} pageSize={FEED_PAGE_SIZE} />
       )}
     </div>
   );

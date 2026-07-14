@@ -17,7 +17,8 @@ export async function fetchFeedPage(
   params: {
     userId: string;
     tab: "for-you" | "following";
-    city: CitySlug;
+    /** null = no city filter (global feed, used by Home). */
+    city: CitySlug | null;
     offset: number;
     limit?: number;
   },
@@ -45,12 +46,13 @@ export async function fetchFeedPage(
       posts = (data as PostWithAuthor[]) ?? [];
     }
   } else {
-    const { data } = await supabase
+    let query = supabase
       .from("posts")
       .select("*, author:profiles!posts_author_id_fkey(*)")
-      .eq("city", params.city)
       .order("created_at", { ascending: false })
       .range(from, to);
+    if (params.city) query = query.eq("city", params.city);
+    const { data } = await query;
     posts = (data as PostWithAuthor[]) ?? [];
   }
 

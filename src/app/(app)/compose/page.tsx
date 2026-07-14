@@ -9,8 +9,7 @@ import { Select } from "@/components/ui/select";
 import { CATEGORIES, CITIES, DEFAULT_CITY, type CategorySlug, type CitySlug } from "@/lib/constants";
 
 const MIN_DURATION = 30;
-const MAX_DURATION = 90;
-const MAX_FILE_BYTES = 200 * 1024 * 1024; // 200MB safety ceiling
+const MAX_FILE_BYTES = 200 * 1024 * 1024; // 200MB safety ceiling — no duration cap
 
 type Stage = "idle" | "validating" | "uploading" | "publishing" | "error";
 
@@ -47,10 +46,8 @@ export default function ComposePage() {
     probe.onloadedmetadata = () => {
       const d = probe.duration;
       setDuration(d);
-      if (d < MIN_DURATION || d > MAX_DURATION) {
-        setError(
-          `Video-ul are ${Math.round(d)}s. Trebuie să fie între ${MIN_DURATION} și ${MAX_DURATION} secunde.`,
-        );
+      if (d < MIN_DURATION) {
+        setError(`Video-ul are ${Math.round(d)}s. Trebuie să fie de cel puțin ${MIN_DURATION} secunde.`);
         setFile(null);
         setVideoPreviewUrl(null);
       } else {
@@ -124,7 +121,7 @@ export default function ComposePage() {
     <div className="flex-1 overflow-y-auto px-4 py-5 w-full max-w-lg lg:max-w-2xl mx-auto">
       <h1 className="font-display text-xl font-semibold mb-1">Ce se întâmplă azi?</h1>
       <p className="text-sm text-text-muted mb-6">
-        O impresie zilnică, un proiect la care lucrezi sau un eveniment — un video scurt (30-90s)
+        O impresie zilnică, un proiect la care lucrezi sau un eveniment — un video (minim 30s)
         sau doar câteva cuvinte.
       </p>
 
@@ -162,7 +159,7 @@ export default function ComposePage() {
               <svg viewBox="0 0 24 24" fill="none" className="h-7 w-7">
                 <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
               </svg>
-              <span className="text-sm">Încarcă un video (30-90s)</span>
+              <span className="text-sm">Încarcă un video (minim 30s)</span>
             </button>
           )}
           <input

@@ -1,16 +1,23 @@
 "use client";
 
 import { useState, useTransition } from "react";
+import { usePathname } from "next/navigation";
 import { setCity } from "@/app/actions/city";
 import { CITIES, cityLabel, type CitySlug } from "@/lib/constants";
 import { useLang } from "@/lib/i18n/language-provider";
 import { cn } from "@/lib/cn";
 
+// Home is a global, city-agnostic feed by design — no point picking a city there.
+const HIDDEN_ON = ["/home"];
+
 export function CitySelector({ initialCity }: { initialCity: CitySlug }) {
   const lang = useLang();
+  const pathname = usePathname();
   const [city, setCityState] = useState<CitySlug>(initialCity);
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  if (HIDDEN_ON.some((p) => pathname.startsWith(p))) return null;
 
   function choose(next: CitySlug) {
     setCityState(next);
