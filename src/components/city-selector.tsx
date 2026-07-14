@@ -2,10 +2,12 @@
 
 import { useState, useTransition } from "react";
 import { setCity } from "@/app/actions/city";
-import { CITIES, type CitySlug } from "@/lib/constants";
+import { CITIES, cityLabel, type CitySlug } from "@/lib/constants";
+import { useLang } from "@/lib/i18n/language-provider";
 import { cn } from "@/lib/cn";
 
 export function CitySelector({ initialCity }: { initialCity: CitySlug }) {
+  const lang = useLang();
   const [city, setCityState] = useState<CitySlug>(initialCity);
   const [open, setOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
@@ -18,7 +20,7 @@ export function CitySelector({ initialCity }: { initialCity: CitySlug }) {
     });
   }
 
-  const label = CITIES.find((c) => c.slug === city)?.label ?? city;
+  const label = cityLabel(city, lang);
 
   return (
     <div className="relative">
@@ -58,7 +60,7 @@ export function CitySelector({ initialCity }: { initialCity: CitySlug }) {
                     c.slug === city ? "text-accent font-medium" : "text-text",
                   )}
                 >
-                  {c.label}
+                  {cityLabel(c.slug, lang)}
                 </button>
               </li>
             ))}

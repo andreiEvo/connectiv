@@ -1,28 +1,17 @@
 "use client";
 
-import { useTransition } from "react";
-import { useRouter } from "next/navigation";
-import { setLanguage } from "@/app/actions/language";
+import { useLang, useSetLang } from "@/lib/i18n/language-provider";
 import { cn } from "@/lib/cn";
-import type { LangCode } from "@/lib/lang-cookie";
 
-export function LanguageToggle({ lang }: { lang: LangCode }) {
-  const router = useRouter();
-  const [isPending, startTransition] = useTransition();
-
-  function choose(next: LangCode) {
-    if (next === lang || isPending) return;
-    startTransition(async () => {
-      await setLanguage(next);
-      router.refresh();
-    });
-  }
+export function LanguageToggle() {
+  const lang = useLang();
+  const setLang = useSetLang();
 
   return (
     <div className="flex items-center rounded-full border border-border-strong overflow-hidden">
       <button
         type="button"
-        onClick={() => choose("ro")}
+        onClick={() => setLang("ro")}
         aria-label="Română"
         aria-pressed={lang === "ro"}
         className={cn(
@@ -34,7 +23,7 @@ export function LanguageToggle({ lang }: { lang: LangCode }) {
       </button>
       <button
         type="button"
-        onClick={() => choose("en")}
+        onClick={() => setLang("en")}
         aria-label="English"
         aria-pressed={lang === "en"}
         className={cn(

@@ -6,6 +6,7 @@ import { Avatar } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FollowButton } from "@/components/follow-button";
 import { StoryRing } from "@/components/story-ring";
+import { DeletePostButton } from "@/components/delete-post-button";
 import { cityLabel, categoryLabel } from "@/lib/constants";
 import { LANG_COOKIE, DEFAULT_LANG, type LangCode } from "@/lib/lang-cookie";
 import { t } from "@/lib/i18n/dictionary";
@@ -91,9 +92,22 @@ export default async function ProfilePage({
 
   return (
     <div className="flex-1 overflow-y-auto">
-      <div className="px-4 pt-6 pb-4 flex flex-col items-center text-center gap-3">
+      <div
+        className={
+          profile.cover_url
+            ? "h-32 bg-cover bg-center"
+            : "h-32 bg-gradient-to-br from-surface to-surface-2"
+        }
+        style={profile.cover_url ? { backgroundImage: `url(${profile.cover_url})` } : undefined}
+      />
+      <div className="px-4 pt-0 pb-4 flex flex-col items-center text-center gap-3 -mt-10">
         <StoryRing active={profileHasStory} badgeSize={20}>
-          <Avatar name={profile.full_name} src={profile.avatar_url} size={72} />
+          <Avatar
+            name={profile.full_name}
+            src={profile.avatar_url}
+            size={72}
+            className="ring-4 ring-bg"
+          />
         </StoryRing>
         <div>
           <h1 className="font-display text-lg font-semibold flex items-center gap-1.5 justify-center">
@@ -110,7 +124,7 @@ export default async function ProfilePage({
             )}
           </h1>
           <p className="text-sm text-text-muted mt-0.5">
-            {cityLabel(profile.city)}
+            {cityLabel(profile.city, lang)}
             {profile.account_type === "companie" && " · Companie"}
           </p>
         </div>
@@ -186,8 +200,11 @@ export default async function ProfilePage({
                 </div>
               )}
               <span className="absolute bottom-1 left-1 text-[9px] uppercase tracking-wide bg-black/60 text-white rounded px-1.5 py-0.5">
-                {categoryLabel(post.category)}
+                {categoryLabel(post.category, lang)}
               </span>
+              {isOwnProfile && tab === "posts" && (
+                <DeletePostButton postId={post.id} iconOnly className="absolute top-1 right-1" />
+              )}
             </Link>
           ))}
         </div>

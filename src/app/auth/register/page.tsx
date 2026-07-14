@@ -9,7 +9,7 @@ import { Input, Label, Textarea } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
 import { cn } from "@/lib/cn";
 import { t } from "@/lib/i18n/dictionary";
-import { useLang } from "@/lib/i18n/use-lang";
+import { useLang } from "@/lib/i18n/language-provider";
 import { passwordIssues, PASSWORD_MIN_LENGTH } from "@/lib/password";
 import {
   ACCOUNT_TYPES,

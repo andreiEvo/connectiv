@@ -39,6 +39,46 @@ export async function updateProfile(formData: FormData) {
   return { ok: true };
 }
 
+export async function updateAvatarUrl(path: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Trebuie să fii autentificat." };
+  if (!path.startsWith(`${user.id}/`)) return { error: "Fișier invalid." };
+
+  const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+  const { error } = await supabase
+    .from("profiles")
+    .update({ avatar_url: data.publicUrl })
+    .eq("id", user.id);
+  if (error) return { error: "Nu am putut salva poza." };
+
+  revalidatePath("/settings");
+  revalidatePath(`/profile/${user.id}`);
+  return { ok: true as const, url: data.publicUrl };
+}
+
+export async function updateCoverUrl(path: string) {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { error: "Trebuie să fii autentificat." };
+  if (!path.startsWith(`${user.id}/`)) return { error: "Fișier invalid." };
+
+  const { data } = supabase.storage.from("avatars").getPublicUrl(path);
+  const { error } = await supabase
+    .from("profiles")
+    .update({ cover_url: data.publicUrl })
+    .eq("id", user.id);
+  if (error) return { error: "Nu am putut salva imaginea de fundal." };
+
+  revalidatePath("/settings");
+  revalidatePath(`/profile/${user.id}`);
+  return { ok: true as const, url: data.publicUrl };
+}
+
 /** MVP toggle for the premium flag — no real billing is wired up yet. */
 export async function togglePremiumFlag(nextValue: boolean) {
   const supabase = await createClient();

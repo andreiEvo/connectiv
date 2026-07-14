@@ -8,7 +8,8 @@ import { Dialog } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/cn";
 import { t } from "@/lib/i18n/dictionary";
-import { useLang } from "@/lib/i18n/use-lang";
+import { useLang } from "@/lib/i18n/language-provider";
+import { DeletePostButton } from "@/components/delete-post-button";
 import {
   actionTypePromptPrefix,
   MASTER_PROFILE_MONTHLY_PRICE_USD,
@@ -108,6 +109,7 @@ export function ActionColumn({
           {t(lang, "action_own_post")}
         </span>
         <ActionIconButton onClick={handleSave} active={saved} label={t(lang, "action_save")} icon="save" />
+        <DeletePostButton postId={post.id} />
       </div>
     );
   }

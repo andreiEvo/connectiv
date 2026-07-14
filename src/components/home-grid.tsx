@@ -5,6 +5,7 @@ import Link from "next/link";
 import { loadMorePosts } from "@/app/actions/feed";
 import { Button } from "@/components/ui/button";
 import { categoryLabel } from "@/lib/constants";
+import { useLang } from "@/lib/i18n/language-provider";
 import type { CitySlug } from "@/lib/constants";
 import type { FeedPost } from "@/lib/feed-query";
 
@@ -19,6 +20,7 @@ export function HomeGrid({
   city: CitySlug;
   pageSize: number;
 }) {
+  const lang = useLang();
   const [posts, setPosts] = useState(initialPosts);
   const [hasMore, setHasMore] = useState(initialHasMore);
   const [isPending, startTransition] = useTransition();
@@ -59,7 +61,7 @@ export function HomeGrid({
             )}
             <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
             <span className="absolute top-2 left-2 text-[9px] uppercase tracking-wide text-on-accent bg-accent rounded-full px-2 py-0.5">
-              {categoryLabel(post.category)}
+              {categoryLabel(post.category, lang)}
             </span>
             <div className="absolute bottom-2 left-2 right-2">
               <p className="text-xs font-medium text-white truncate">{post.author.full_name}</p>

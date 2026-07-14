@@ -4,10 +4,11 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { cn } from "@/lib/cn";
 import { t } from "@/lib/i18n/dictionary";
-import type { LangCode } from "@/lib/lang-cookie";
+import { useLang } from "@/lib/i18n/language-provider";
 
-export function BottomNav({ profileId, lang }: { profileId: string; lang: LangCode }) {
+export function BottomNav({ profileId }: { profileId: string }) {
   const pathname = usePathname();
+  const lang = useLang();
 
   const items = [
     { href: "/home", label: t(lang, "nav_home"), icon: HomeIcon },

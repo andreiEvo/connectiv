@@ -12,6 +12,7 @@ export type Profile = {
   building_what: string;
   city: CitySlug;
   avatar_url: string | null;
+  cover_url: string | null;
   is_approved: boolean;
   is_premium: boolean;
   account_type: AccountTypeSlug;

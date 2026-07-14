@@ -5,6 +5,8 @@ import { updateProfile } from "@/app/actions/profile";
 import { Button } from "@/components/ui/button";
 import { Input, Label, Textarea } from "@/components/ui/input";
 import { Select } from "@/components/ui/select";
+import { AvatarUploadField } from "@/components/avatar-upload-field";
+import { CoverUploadField } from "@/components/cover-upload-field";
 import { CITIES, type CitySlug } from "@/lib/constants";
 import type { Profile } from "@/lib/supabase/types";
 
@@ -38,41 +40,53 @@ export function SettingsForm({ profile, email }: { profile: Profile; email: stri
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <div className="space-y-5">
       <div className="space-y-1.5">
-        <Label>Email</Label>
-        <Input value={email} disabled />
-      </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="fullName">Nume</Label>
-        <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} />
-      </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="buildingWhat">Ce construiești?</Label>
-        <Textarea
-          id="buildingWhat"
-          rows={2}
-          maxLength={140}
-          value={buildingWhat}
-          onChange={(e) => setBuildingWhat(e.target.value)}
-        />
-      </div>
-      <div className="space-y-1.5">
-        <Label htmlFor="city">Oraș</Label>
-        <Select id="city" value={city} onChange={(e) => setCity(e.target.value as CitySlug)}>
-          {CITIES.map((c) => (
-            <option key={c.slug} value={c.slug}>
-              {c.label}
-            </option>
-          ))}
-        </Select>
+        <Label>Fundal de profil</Label>
+        <CoverUploadField initialUrl={profile.cover_url} />
       </div>
 
-      {error && <p className="text-sm text-red-400">{error}</p>}
+      <div className="space-y-1.5">
+        <Label>Poză de profil</Label>
+        <AvatarUploadField fullName={profile.full_name} initialUrl={profile.avatar_url} />
+      </div>
 
-      <Button type="submit" disabled={saving} className="w-full">
-        {saving ? "Se salvează…" : saved ? "Salvat ✓" : "Salvează modificările"}
-      </Button>
-    </form>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div className="space-y-1.5">
+          <Label>Email</Label>
+          <Input value={email} disabled />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="fullName">Nume</Label>
+          <Input id="fullName" value={fullName} onChange={(e) => setFullName(e.target.value)} />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="buildingWhat">Ce construiești?</Label>
+          <Textarea
+            id="buildingWhat"
+            rows={2}
+            maxLength={140}
+            value={buildingWhat}
+            onChange={(e) => setBuildingWhat(e.target.value)}
+          />
+        </div>
+        <div className="space-y-1.5">
+          <Label htmlFor="city">Oraș</Label>
+          <Select id="city" value={city} onChange={(e) => setCity(e.target.value as CitySlug)}>
+            {CITIES.map((c) => (
+              <option key={c.slug} value={c.slug}>
+                {c.label}
+              </option>
+            ))}
+          </Select>
+        </div>
+
+        {error && <p className="text-sm text-red-400">{error}</p>}
+
+        <Button type="submit" disabled={saving} className="w-full">
+          {saving ? "Se salvează…" : saved ? "Salvat ✓" : "Salvează modificările"}
+        </Button>
+      </form>
+    </div>
   );
 }

@@ -74,3 +74,23 @@ export async function createPost(formData: FormData): Promise<CreatePostResult> 
   revalidatePath("/feed");
   redirect("/feed");
 }
+
+export async function deletePost(postId: string): Promise<{ ok: boolean }> {
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false };
+
+  const { error } = await supabase
+    .from("posts")
+    .delete()
+    .eq("id", postId)
+    .eq("author_id", user.id);
+  if (error) return { ok: false };
+
+  revalidatePath("/feed");
+  revalidatePath("/home");
+  revalidatePath(`/profile/${user.id}`);
+  return { ok: true };
+}

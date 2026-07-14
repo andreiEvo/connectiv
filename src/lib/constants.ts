@@ -1,3 +1,5 @@
+import type { LangCode } from "@/lib/lang-cookie";
+
 export const CITIES = [
   { slug: "bucuresti", label: "București" },
   { slug: "cluj-napoca", label: "Cluj-Napoca" },
@@ -9,7 +11,17 @@ export type CitySlug = (typeof CITIES)[number]["slug"];
 
 export const DEFAULT_CITY: CitySlug = "bucuresti";
 
-export function cityLabel(slug: string): string {
+// City names are proper nouns — same spelling in English, only diacritics are
+// commonly dropped in English-language contexts.
+const CITY_LABELS_EN: Record<CitySlug, string> = {
+  bucuresti: "Bucharest",
+  "cluj-napoca": "Cluj-Napoca",
+  timisoara: "Timisoara",
+  craiova: "Craiova",
+};
+
+export function cityLabel(slug: string, lang: LangCode = "ro"): string {
+  if (lang === "en" && slug in CITY_LABELS_EN) return CITY_LABELS_EN[slug as CitySlug];
   return CITIES.find((c) => c.slug === slug)?.label ?? slug;
 }
 
@@ -24,7 +36,17 @@ export const CATEGORIES = [
 
 export type CategorySlug = (typeof CATEGORIES)[number]["slug"];
 
-export function categoryLabel(slug: string): string {
+const CATEGORY_LABELS_EN: Record<CategorySlug, string> = {
+  "side-hustle": "Side hustle",
+  antreprenoriat: "Entrepreneurship",
+  "career-switch": "Career switch",
+  colaborare: "Collaboration",
+  "caut-de-lucru": "Looking for work",
+  eveniment: "Event",
+};
+
+export function categoryLabel(slug: string, lang: LangCode = "ro"): string {
+  if (lang === "en" && slug in CATEGORY_LABELS_EN) return CATEGORY_LABELS_EN[slug as CategorySlug];
   return CATEGORIES.find((c) => c.slug === slug)?.label ?? slug;
 }
 
@@ -38,7 +60,17 @@ export const ACTION_TYPES = [
 
 export type ActionTypeSlug = (typeof ACTION_TYPES)[number]["slug"];
 
-export function actionTypeLabel(slug: string): string {
+const ACTION_TYPE_LABELS_EN: Record<ActionTypeSlug, string> = {
+  chat: "Continue in chat",
+  sprijin: "Offer transition support",
+  cafea: "Grab a coffee",
+  colaborare: "Propose collaboration",
+};
+
+export function actionTypeLabel(slug: string, lang: LangCode = "ro"): string {
+  if (lang === "en" && slug in ACTION_TYPE_LABELS_EN) {
+    return ACTION_TYPE_LABELS_EN[slug as ActionTypeSlug];
+  }
   return ACTION_TYPES.find((a) => a.slug === slug)?.label ?? slug;
 }
 
@@ -59,6 +91,18 @@ export const ACCOUNT_TYPES = [
 ] as const;
 
 export type AccountTypeSlug = (typeof ACCOUNT_TYPES)[number]["slug"];
+
+const ACCOUNT_TYPE_LABELS_EN: Record<AccountTypeSlug, string> = {
+  individual: "Personal account",
+  companie: "Company account",
+};
+
+export function accountTypeLabel(slug: string, lang: LangCode = "ro"): string {
+  if (lang === "en" && slug in ACCOUNT_TYPE_LABELS_EN) {
+    return ACCOUNT_TYPE_LABELS_EN[slug as AccountTypeSlug];
+  }
+  return ACCOUNT_TYPES.find((a) => a.slug === slug)?.label ?? slug;
+}
 
 export const FREE_MONTHLY_CONVERSATIONS = 5;
 

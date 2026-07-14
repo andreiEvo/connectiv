@@ -38,6 +38,9 @@ body {
   background-color: var(--color-bg);
   color: var(--color-text);
   font-family: var(--font-sans), system-ui, sans-serif;
+  /* vh fallback first for browsers/webviews without dvh support, then the
+     dynamic-viewport override for ones that have it (mobile browser chrome). */
+  min-height: 100vh;
   min-height: 100dvh;
   background-image:
     linear-gradient(var(--color-border) 1px, transparent 1px),
@@ -104,6 +107,14 @@ body::before {
   100% {
     background-position: 200% 0;
   }
+}
+
+/* Tailwind's h-dvh utility emits only `height: 100dvh`, with no fallback for
+   browsers/webviews that don't support dvh (they'd otherwise fall through to
+   height:auto and the whole page — bottom nav included — starts scrolling). */
+.app-shell-height {
+  height: 100vh;
+  height: 100dvh;
 }
 
 .skeleton {

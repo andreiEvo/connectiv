@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from "next";
 import { Space_Grotesk, Inter } from "next/font/google";
+import { cookies } from "next/headers";
 import { ServiceWorkerRegister } from "@/components/sw-register";
+import { LanguageProvider } from "@/lib/i18n/language-provider";
+import { LANG_COOKIE, DEFAULT_LANG, type LangCode } from "@/lib/lang-cookie";
 import "./globals.css";
 
 const spaceGrotesk = Space_Grotesk({
@@ -35,19 +38,22 @@ export const viewport: Viewport = {
   colorScheme: "dark",
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const cookieStore = await cookies();
+  const lang = (cookieStore.get(LANG_COOKIE)?.value as LangCode) ?? DEFAULT_LANG;
+
   return (
     <html
-      lang="ro"
+      lang={lang}
       className={`${spaceGrotesk.variable} ${inter.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
         <ServiceWorkerRegister />
-        {children}
+        <LanguageProvider initialLang={lang}>{children}</LanguageProvider>
       </body>
     </html>
   );

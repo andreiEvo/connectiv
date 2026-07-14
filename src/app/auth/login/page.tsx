@@ -7,7 +7,7 @@ import { login } from "@/app/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input, Label } from "@/components/ui/input";
 import { t } from "@/lib/i18n/dictionary";
-import { useLang } from "@/lib/i18n/use-lang";
+import { useLang } from "@/lib/i18n/language-provider";
 
 export default function LoginPage() {
   return (

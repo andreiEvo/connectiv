@@ -10,6 +10,7 @@ import { Logo } from "@/components/logo";
 import { categoryLabel, cityLabel } from "@/lib/constants";
 import { cn } from "@/lib/cn";
 import { downloadEventIcs } from "@/lib/ics";
+import { useLang } from "@/lib/i18n/language-provider";
 import type { FeedPost } from "@/lib/feed-query";
 
 export function VideoCard({
@@ -31,6 +32,7 @@ export function VideoCard({
   renderVideo: boolean;
   onActive: (index: number) => void;
 }) {
+  const lang = useLang();
   const videoRef = useRef<HTMLVideoElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [muted, setMuted] = useState(true);
@@ -132,13 +134,13 @@ export function VideoCard({
         <div className="flex-1 min-w-0 space-y-2">
           <Link href={`/profile/${post.author_id}`} className="block space-y-2">
             <span className="inline-block text-[11px] font-medium uppercase tracking-wide text-on-accent bg-accent rounded-full px-2.5 py-1">
-              {categoryLabel(post.category)}
+              {categoryLabel(post.category, lang)}
             </span>
             <div className="flex items-center gap-2">
               <Avatar name={post.author.full_name} src={post.author.avatar_url} size={32} />
               <div className="min-w-0">
                 <p className="text-sm font-semibold text-text truncate">{post.author.full_name}</p>
-                <p className="text-xs text-text-muted truncate">{cityLabel(post.city)}</p>
+                <p className="text-xs text-text-muted truncate">{cityLabel(post.city, lang)}</p>
               </div>
             </div>
             <p className="text-sm text-text/90 leading-snug line-clamp-3">{post.description}</p>
