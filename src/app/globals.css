@@ -150,3 +150,29 @@ body::before {
   animation: bolt-pulse 1.6s ease-in-out infinite;
   transform-origin: center;
 }
+
+@keyframes story-ring-spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.story-ring {
+  display: inline-flex;
+  border-radius: 9999px;
+  padding: 2.5px;
+  background: conic-gradient(
+    from 0deg,
+    var(--color-accent),
+    #fff3b0 25%,
+    var(--color-accent) 50%,
+    #fff3b0 75%,
+    var(--color-accent) 100%
+  );
+  animation: story-ring-spin 2.6s linear infinite;
+}
+
+.story-ring > * {
+  border-radius: 9999px;
+  border: 2px solid var(--color-bg) !important;
+}

@@ -103,6 +103,16 @@ export type RateLimitEvent = {
   created_at: string;
 };
 
+export type Story = {
+  id: string;
+  author_id: string;
+  video_url: string;
+  created_at: string;
+  expires_at: string;
+};
+
+export type StoryWithAuthor = Story & { author: Profile };
+
 type Relationships = { Relationships: [] };
 
 export type Database = {
@@ -166,6 +176,11 @@ export type Database = {
         Row: RateLimitEvent;
         Insert: Partial<RateLimitEvent> & { key: string };
         Update: Partial<RateLimitEvent>;
+      } & Relationships;
+      stories: {
+        Row: Story;
+        Insert: Partial<Story> & { author_id: string; video_url: string };
+        Update: Partial<Story>;
       } & Relationships;
     };
     Views: Record<string, never>;

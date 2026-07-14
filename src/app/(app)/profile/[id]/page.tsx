@@ -5,9 +5,11 @@ import { createClient } from "@/lib/supabase/server";
 import { Avatar } from "@/components/ui/avatar";
 import { EmptyState } from "@/components/ui/empty-state";
 import { FollowButton } from "@/components/follow-button";
+import { StoryRing } from "@/components/story-ring";
 import { cityLabel, categoryLabel } from "@/lib/constants";
 import { LANG_COOKIE, DEFAULT_LANG, type LangCode } from "@/lib/lang-cookie";
 import { t } from "@/lib/i18n/dictionary";
+import { hasActiveStory } from "@/app/actions/stories";
 import type { Post } from "@/lib/supabase/types";
 
 export default async function ProfilePage({
@@ -35,7 +37,7 @@ export default async function ProfilePage({
   const { data: profile } = await supabase.from("profiles").select("*").eq("id", id).maybeSingle();
   if (!profile) notFound();
 
-  const [{ count: followerCount }, { count: followingCount }, { data: isFollowingRow }] =
+  const [{ count: followerCount }, { count: followingCount }, { data: isFollowingRow }, profileHasStory] =
     await Promise.all([
       supabase
         .from("follows")
@@ -53,6 +55,7 @@ export default async function ProfilePage({
             .eq("follower_id", user.id)
             .eq("following_id", id)
             .maybeSingle(),
+      hasActiveStory(id),
     ]);
 
   let posts: Post[] = [];
@@ -89,7 +92,9 @@ export default async function ProfilePage({
   return (
     <div className="flex-1 overflow-y-auto">
       <div className="px-4 pt-6 pb-4 flex flex-col items-center text-center gap-3">
-        <Avatar name={profile.full_name} src={profile.avatar_url} size={72} />
+        <StoryRing active={profileHasStory} badgeSize={20}>
+          <Avatar name={profile.full_name} src={profile.avatar_url} size={72} />
+        </StoryRing>
         <div>
           <h1 className="font-display text-lg font-semibold flex items-center gap-1.5 justify-center">
             {profile.full_name}

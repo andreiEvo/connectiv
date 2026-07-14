@@ -6,8 +6,10 @@ import { LANG_COOKIE, DEFAULT_LANG, type LangCode } from "@/lib/lang-cookie";
 import { t } from "@/lib/i18n/dictionary";
 import { DEFAULT_CITY, type CitySlug } from "@/lib/constants";
 import { fetchFeedPage, FEED_PAGE_SIZE } from "@/lib/feed-query";
+import { getActiveStoryAuthors, hasActiveStory } from "@/app/actions/stories";
 import { EmptyState } from "@/components/ui/empty-state";
 import { HomeGrid } from "@/components/home-grid";
+import { StoriesBar } from "@/components/stories-bar";
 import { Tagline } from "@/components/tagline";
 import { Logo } from "@/components/logo";
 import Link from "next/link";
@@ -23,19 +25,24 @@ export default async function HomePage() {
   const city = (cookieStore.get(CITY_COOKIE)?.value as CitySlug) ?? DEFAULT_CITY;
   const lang = (cookieStore.get(LANG_COOKIE)?.value as LangCode) ?? DEFAULT_LANG;
 
-  const { posts, hasMore } = await fetchFeedPage(supabase, {
-    userId: user.id,
-    tab: "for-you",
-    city,
-    offset: 0,
-    limit: 12,
-  });
+  const [{ posts, hasMore }, { data: profile }, storyAuthors, ownsStory] = await Promise.all([
+    fetchFeedPage(supabase, { userId: user.id, tab: "for-you", city, offset: 0, limit: 12 }),
+    supabase.from("profiles").select("*").eq("id", user.id).single(),
+    getActiveStoryAuthors(),
+    hasActiveStory(user.id),
+  ]);
 
   return (
     <div className="flex-1 overflow-y-auto px-3 py-4">
       <div className="px-1 mb-4">
         <Tagline />
       </div>
+
+      {profile && (
+        <div className="mb-5">
+          <StoriesBar authors={storyAuthors} currentUser={profile} currentUserHasStory={ownsStory} />
+        </div>
+      )}
 
       {posts.length === 0 ? (
         <EmptyState
