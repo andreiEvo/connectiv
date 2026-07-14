@@ -33,7 +33,7 @@ export default async function HomePage() {
   ]);
 
   return (
-    <div className="flex-1 overflow-y-auto px-3 py-4">
+    <div className="flex-1 overflow-y-auto px-3 py-4 lg:px-8 lg:py-8 w-full max-w-lg lg:max-w-5xl mx-auto">
       <div className="px-1 mb-4">
         <Tagline />
       </div>

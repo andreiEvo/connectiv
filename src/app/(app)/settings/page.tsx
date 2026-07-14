@@ -29,7 +29,7 @@ export default async function SettingsPage() {
   if (!profile) redirect("/auth/login");
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 py-5 space-y-6">
+    <div className="flex-1 overflow-y-auto px-4 py-5 space-y-6 w-full max-w-lg lg:max-w-2xl mx-auto">
       <h1 className="font-display text-xl font-semibold">Setări</h1>
 
       <PremiumCard

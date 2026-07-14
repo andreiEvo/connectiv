@@ -82,7 +82,7 @@ export function MessageThread({
   }
 
   return (
-    <div className="flex flex-col flex-1 min-h-0">
+    <div className="flex flex-col flex-1 min-h-0 w-full max-w-lg lg:max-w-2xl mx-auto">
       <div className="flex items-center gap-3 px-4 py-3 border-b border-border">
         <Link href={`/profile/${otherUser.id}`} className="flex items-center gap-3 flex-1 min-w-0">
           <Avatar name={otherUser.full_name} src={otherUser.avatar_url} size={36} />

@@ -91,12 +91,12 @@ export default async function ProfilePage({
   }
 
   return (
-    <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 overflow-y-auto w-full max-w-lg lg:max-w-3xl mx-auto">
       <div
         className={
           profile.cover_url
-            ? "h-32 bg-cover bg-center"
-            : "h-32 bg-gradient-to-br from-surface to-surface-2"
+            ? "h-32 lg:h-48 lg:rounded-b-xl bg-cover bg-center"
+            : "h-32 lg:h-48 lg:rounded-b-xl bg-gradient-to-br from-surface to-surface-2"
         }
         style={profile.cover_url ? { backgroundImage: `url(${profile.cover_url})` } : undefined}
       />
@@ -178,7 +178,7 @@ export default async function ProfilePage({
           }
         />
       ) : (
-        <div className="grid grid-cols-3 gap-0.5 p-0.5">
+        <div className="grid grid-cols-3 lg:grid-cols-4 gap-0.5 p-0.5">
           {posts.map((post) => (
             <Link
               key={post.id}
@@ -250,7 +250,7 @@ function FollowingList({
   isOwnProfile: boolean;
 }) {
   return (
-    <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 overflow-y-auto w-full max-w-lg lg:max-w-3xl mx-auto">
       <div className="px-4 pt-6 pb-4 flex flex-col items-center text-center gap-3">
         <Avatar name={profile.full_name} src={profile.avatar_url} size={72} />
         <h1 className="font-display text-lg font-semibold">{profile.full_name}</h1>

@@ -54,7 +54,7 @@ export default async function MessagesPage() {
   }
 
   return (
-    <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 overflow-y-auto w-full max-w-lg lg:max-w-2xl mx-auto">
       <h1 className="font-display text-lg font-semibold px-4 pt-5 pb-3">Mesaje</h1>
 
       {rows.length === 0 ? (

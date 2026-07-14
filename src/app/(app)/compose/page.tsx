@@ -121,7 +121,7 @@ export default function ComposePage() {
   const busy = stage === "uploading" || stage === "publishing";
 
   return (
-    <div className="flex-1 overflow-y-auto px-4 py-5">
+    <div className="flex-1 overflow-y-auto px-4 py-5 w-full max-w-lg lg:max-w-2xl mx-auto">
       <h1 className="font-display text-xl font-semibold mb-1">Ce se întâmplă azi?</h1>
       <p className="text-sm text-text-muted mb-6">
         O impresie zilnică, un proiect la care lucrezi sau un eveniment — un video scurt (30-90s)

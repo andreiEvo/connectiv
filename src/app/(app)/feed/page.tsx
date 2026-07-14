@@ -56,7 +56,7 @@ export default async function FeedPage({
   }
 
   return (
-    <div className="relative flex-1 min-h-0">
+    <div className="relative flex-1 min-h-0 w-full max-w-lg mx-auto">
       <FeedTabs active={tab} lang={lang} />
 
       {posts.length === 0 ? (
