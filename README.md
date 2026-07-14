@@ -1,36 +1,45 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# connectiv
 
-## Getting Started
+Rețea socială video-first pentru antreprenori și oameni cu side-hustle-uri din Cluj-Napoca, București, Timișoara și Craiova — un loc pentru construcție și acțiune, nu pentru CV-uri.
 
-First, run the development server:
+**Live demo:** [connectiv-omega.vercel.app](https://connectiv-omega.vercel.app)
+
+## Funcționalități
+
+- **Feed video vertical** (stil TikTok) + **Home** — grid de descoperire globală
+- **Story-uri** efemere de 24h, cu inel animat pe poza de profil
+- **Autentificare** email/parolă cu politică de parolă și confirmare pe email
+- **Mesagerie 1-la-1 în timp real**, pornită din 4 tipuri de acțiuni contextuale (chat, sprijin la tranziție, cafea, colaborare)
+- **Reacții** (foc/fulger) și comentarii pe fiecare postare
+- **Postări de tip eveniment** cu integrare „adaugă în calendar" (.ics)
+- **Conturi de companie** separate de conturile personale
+- **Cropper de imagine** (drag + zoom) pentru poză de profil și fundal personalizabil
+- **Freemium** cu limită lunară de conversații + upgrade la Master Profile
+- **Bilingv** RO/EN, instant, fără reîncărcare de pagină
+- **PWA** instalabilă pe telefon
+- Layout responsive: sidebar de navigare pe desktop, bară de jos pe mobil
+
+## Stack tehnic
+
+- **Next.js 16** (App Router) + **TypeScript**
+- **Tailwind CSS v4**
+- **Supabase** — Postgres, Auth, Storage, Realtime, Row Level Security
+- **Vercel** — hosting + deploy automat, colocat regional cu baza de date
+- **Sentry** — monitorizare erori în producție
+- **Stripe** — plăți (integrare în curs)
+- **Zod** — validare server-side pe toate acțiunile
+
+## Arhitectură
+
+- Server Actions pentru toată logica de scriere (fără endpoint-uri API separate)
+- Rate limiting la nivel de bază de date pentru login, înregistrare, mesaje, postări
+- RLS (Row Level Security) pe fiecare tabel — accesul la date e impus de Postgres, nu doar de aplicație
+
+## Rulare locală
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
-
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
-
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
-
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Necesită un fișier `.env.local` cu cheile unui proiect Supabase propriu (vezi `.env.local.example`) și migrațiile din `supabase/migrations/` aplicate.
