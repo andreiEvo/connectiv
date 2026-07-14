@@ -34,6 +34,19 @@ html {
   color-scheme: dark;
 }
 
+/* Removes the ~300ms tap delay some mobile browsers add while waiting to see
+   if a tap is the start of a double-tap-to-zoom gesture. viewport's
+   maximumScale already disables that gesture, but this makes it explicit and
+   covers browsers that still wait on touch-action alone. */
+button,
+a,
+[role="button"],
+input,
+select,
+textarea {
+  touch-action: manipulation;
+}
+
 body {
   background-color: var(--color-bg);
   color: var(--color-text);
